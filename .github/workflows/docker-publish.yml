@@ -51,6 +51,8 @@ jobs:
             tinywan/typephp-builder:static
             tinywan/typephp-builder:latest
             tinywan/typephp-builder:${{ github.ref_name }}
+            tinywan/typephp-builder:${{ github.ref_name }}-alpine
+            tinywan/typephp-builder:${{ github.ref_name }}-static
             tinywan/typephp-webman-builder:alpine
             tinywan/typephp-webman-builder-static:${{ github.ref_name }}
 
@@ -64,4 +66,5 @@ jobs:
           push: ${{ github.event_name != 'pull_request' && steps.docker_creds.outputs.has_creds == 'true' }}
           tags: |
             tinywan/typephp-builder:glibc
+            tinywan/typephp-builder:${{ github.ref_name }}-glibc
             tinywan/typephp-webman-builder:${{ github.ref_name }}
