@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 set -e
 
-IMAGE="tinywan/typephp-builder:0.9.4-alpine"
+IMAGE="tinywan/typephp-builder:0.9.5-alpine"
 
 if [ "${1:-}" = "--glibc" ]; then
-    IMAGE="tinywan/typephp-builder:0.9.4-glibc"
+    IMAGE="tinywan/typephp-builder:0.9.5-glibc"
     shift
 fi
 
@@ -14,5 +14,5 @@ if ! command -v docker >/dev/null 2>&1; then
     exit 1
 fi
 
-echo "[TypePHP Builder 0.9.4] Launching container $IMAGE ..."
+echo "[TypePHP Builder 0.9.5] Launching container $IMAGE ..."
 exec docker run --rm -v "$(pwd)":/workspace "$IMAGE" "$@"

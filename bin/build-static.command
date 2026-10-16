@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
-echo "[TypePHP Builder 0.9.4] Starting Alpine Musl Full-Static Build ..."
-docker run --rm -v "$ROOT":/workspace tinywan/typephp-builder:0.9.4-alpine "$@"
+echo "[TypePHP Builder 0.9.5] Starting Alpine Musl Full-Static Build ..."
+docker run --rm -v "$ROOT":/workspace tinywan/typephp-builder:0.9.5-alpine "$@"
 code=$?
 echo ""
 if [ $code -eq 0 ]; then

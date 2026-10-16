@@ -1,10 +1,10 @@
 @echo off
 setlocal
 
-set "IMAGE=tinywan/typephp-builder:0.9.4-alpine"
+set "IMAGE=tinywan/typephp-builder:0.9.5-alpine"
 
 if "%1"=="--glibc" (
-    set "IMAGE=tinywan/typephp-builder:0.9.4-glibc"
+    set "IMAGE=tinywan/typephp-builder:0.9.5-glibc"
     shift
 )
 
@@ -15,6 +15,6 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-echo [TypePHP Builder 0.9.4] Launching container %IMAGE% ...
+echo [TypePHP Builder 0.9.5] Launching container %IMAGE% ...
 docker run --rm -v "%cd%":/workspace %IMAGE% %*
 exit /b %ERRORLEVEL%

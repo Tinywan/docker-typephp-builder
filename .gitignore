@@ -1,0 +1,9 @@
+dist/
+dist-*/
+dist-packages/
+dist-assets/
+.typephp/
+*.tar.gz
+*.zip
+.DS_Store
+Thumbs.db

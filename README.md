@@ -82,9 +82,9 @@ graph LR
 
 | 编译形态 | 浮动最新标签 (Floating Tag) | 固定版本标签 (Pinned Version Tag) | 说明 |
 | :--- | :--- | :--- | :--- |
-| **Alpine Musl 全静态单文件 (推荐)** | `tinywan/typephp-builder:alpine`<br>`tinywan/typephp-builder:static`<br>`tinywan/typephp-builder:latest` | `tinywan/typephp-builder:0.9.4-alpine`<br>`tinywan/typephp-builder:0.9.4` | 生成 ~6MB 纯静态单文件，无外部依赖 |
-| **Ubuntu Glibc 动态便携包** | `tinywan/typephp-builder:glibc` | `tinywan/typephp-builder:0.9.4-glibc` | 动态链接，内置扩展与 `dist/lib` 运行时 |
-| **历史插件兼容别名** | `tinywan/typephp-webman-builder:alpine` | `tinywan/typephp-webman-builder-static:0.9.4`<br>`tinywan/typephp-webman-builder:0.9.4` | 兼容旧版插件别名 |
+| **Alpine Musl 全静态单文件 (推荐)** | `tinywan/typephp-builder:alpine`<br>`tinywan/typephp-builder:static`<br>`tinywan/typephp-builder:latest` | `tinywan/typephp-builder:0.9.5-alpine`<br>`tinywan/typephp-builder:0.9.5` | 生成 ~6MB 纯静态单文件，无外部依赖 |
+| **Ubuntu Glibc 动态便携包** | `tinywan/typephp-builder:glibc` | `tinywan/typephp-builder:0.9.5-glibc` | 动态链接，内置扩展与 `dist/lib` 运行时 |
+| **历史插件兼容别名** | `tinywan/typephp-webman-builder:alpine` | `tinywan/typephp-webman-builder-static:0.9.5`<br>`tinywan/typephp-webman-builder:0.9.5` | 兼容旧版插件别名 |
 
 ---
 

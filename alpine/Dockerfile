@@ -5,7 +5,7 @@
 
 FROM alpine:edge
 
-ARG TYPEPHP_VERSION=v0.9.4
+ARG TYPEPHP_VERSION=v0.9.5
 
 LABEL maintainer="Tinywan <gwmpgc@gmail.com>"
 LABEL org.opencontainers.image.title="TypePHP AOT Builder (Alpine Musl Full-Static)"
