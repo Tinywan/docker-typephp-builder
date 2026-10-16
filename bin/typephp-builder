@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+set -e
+
+IMAGE="tinywan/typephp-builder:0.9.4-alpine"
+
+if [ "${1:-}" = "--glibc" ]; then
+    IMAGE="tinywan/typephp-builder:0.9.4-glibc"
+    shift
+fi
+
+if ! command -v docker >/dev/null 2>&1; then
+    echo "[ERROR] Docker is not installed or not in PATH." >&2
+    echo "Please install Docker: https://www.docker.com/" >&2
+    exit 1
+fi
+
+echo "[TypePHP Builder 0.9.4] Launching container $IMAGE ..."
+exec docker run --rm -v "$(pwd)":/workspace "$IMAGE" "$@"
