@@ -1,0 +1,53 @@
+name: Build and Publish Docker Images
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: actions/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: actions/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 1. 构建并发布 Alpine Musl 全静态编译引擎
+      - name: Build & Push Alpine Static Builder
+        uses: docker/build-push-action@v5
+        with:
+          context: ./alpine
+          file: ./alpine/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            tinywan/typephp-builder:alpine
+            tinywan/typephp-builder:static
+            tinywan/typephp-builder:latest
+            tinywan/typephp-builder:${{ github.ref_name }}
+            tinywan/typephp-webman-builder:alpine
+            tinywan/typephp-webman-builder-static:${{ github.ref_name }}
+
+      # 2. 构建并发布 Glibc 动态便携包编译引擎
+      - name: Build & Push Glibc Builder
+        uses: docker/build-push-action@v5
+        with:
+          context: ./glibc
+          file: ./glibc/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            tinywan/typephp-builder:glibc
+            tinywan/typephp-webman-builder:${{ github.ref_name }}

@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # 1. Alpine Musl 纯静态单文件编译引擎 (推荐)
+  builder-static:
+    build:
+      context: ./alpine
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: tinywan/typephp-linux-x64-static:v0.9.4
+    image: tinywan/typephp-builder:alpine
+    container_name: typephp-builder-alpine
+    platform: linux/amd64
+    environment:
+      - TYPEPHP_OUTPUT_DIR=dist
+      - TYPEPHP_OUTPUT_NAME=${TYPEPHP_OUTPUT_NAME:-}
+      - TYPEPHP_FORCE=1
+      - TYPEPHP_STATIC=1
+    volumes:
+      - ${HOST_PROJECT_PATH:-./}:/workspace
+
+  # 2. Linux Glibc 动态便携包编译引擎
+  builder-glibc:
+    build:
+      context: ./glibc
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: tinywan/typephp-linux-x64:v0.9.4
+    image: tinywan/typephp-builder:glibc
+    container_name: typephp-builder-glibc
+    platform: linux/amd64
+    environment:
+      - TYPEPHP_OUTPUT_DIR=dist
+      - TYPEPHP_OUTPUT_NAME=${TYPEPHP_OUTPUT_NAME:-}
+      - TYPEPHP_FORCE=1
+    volumes:
+      - ${HOST_PROJECT_PATH:-./}:/workspace
