@@ -90,19 +90,35 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          mkdir -p dist-assets/windows dist-assets/macos dist-assets/linux
+          mkdir -p dist-assets/windows dist-assets/macos dist-assets/linux-static dist-assets/linux-glibc
 
-          cp bin/typephp-builder.cmd bin/build.cmd docker-compose.yml README.md dist-assets/windows/
-          cp bin/typephp-builder bin/build.command docker-compose.yml README.md dist-assets/macos/
-          cp bin/typephp-builder docker-compose.yml README.md dist-assets/linux/
-          chmod +x dist-assets/macos/* dist-assets/linux/*
+          # Windows (内置全套 static 与 glibc 脚本)
+          cp bin/*.cmd docker-compose.yml README.md dist-assets/windows/
+
+          # macOS (内置全套 static 与 glibc 脚本)
+          cp bin/build*.command bin/typephp-builder docker-compose.yml README.md dist-assets/macos/
+          chmod +x dist-assets/macos/*
+
+          # Linux Static (纯静态单文件独立包)
+          cp bin/linux/build-static.sh dist-assets/linux-static/build.sh
+          cp bin/linux/build-static.sh dist-assets/linux-static/typephp-builder
+          cp docker-compose.yml README.md dist-assets/linux-static/
+          chmod +x dist-assets/linux-static/*
+
+          # Linux Glibc (动态便携目录独立包)
+          cp bin/linux/build-glibc.sh dist-assets/linux-glibc/build.sh
+          cp bin/linux/build-glibc.sh dist-assets/linux-glibc/typephp-builder
+          cp docker-compose.yml README.md dist-assets/linux-glibc/
+          chmod +x dist-assets/linux-glibc/*
 
           (cd dist-assets/windows && zip -r "../typephp-builder_${VERSION}_windows-x86_64_php-8.5.0.zip" .)
           tar -czf "dist-assets/typephp-builder_${VERSION}_macos-arm64_php-8.5.0.tar.gz" -C dist-assets/macos .
-          tar -czf "dist-assets/typephp-builder_${VERSION}_linux-x86_64_php-8.5.0.tar.gz" -C dist-assets/linux .
+          tar -czf "dist-assets/typephp-builder_${VERSION}_linux-x86_64-static_php-8.5.0.tar.gz" -C dist-assets/linux-static .
+          tar -czf "dist-assets/typephp-builder_${VERSION}_linux-x86_64-glibc_php-8.4.tar.gz" -C dist-assets/linux-glibc .
 
           gh release upload "${{ github.ref_name }}" \
             "dist-assets/typephp-builder_${VERSION}_windows-x86_64_php-8.5.0.zip" \
             "dist-assets/typephp-builder_${VERSION}_macos-arm64_php-8.5.0.tar.gz" \
-            "dist-assets/typephp-builder_${VERSION}_linux-x86_64_php-8.5.0.tar.gz" \
+            "dist-assets/typephp-builder_${VERSION}_linux-x86_64-static_php-8.5.0.tar.gz" \
+            "dist-assets/typephp-builder_${VERSION}_linux-x86_64-glibc_php-8.4.tar.gz" \
             --clobber || true

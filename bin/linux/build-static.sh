@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+set -e
+echo "[TypePHP Builder 0.9.4] Starting Alpine Musl Full-Static Build ..."
+exec docker run --rm -v "$(pwd)":/workspace tinywan/typephp-builder:0.9.4-alpine "$@"
