@@ -141,7 +141,7 @@ jobs="$(nproc 2>/dev/null || echo 2)"
 [[ "$jobs" -lt 1 ]] && jobs=1
 sed -i "s/^job:.*/job: ${jobs}/" "$project_file"
 
-echo "[INFO] Compiling Linux x86_64 glibc binary (job=${jobs})..."
+echo "[INFO] Compiling Linux glibc binary (arch=$(uname -m), job=${jobs})..."
 "${tpc[@]}" "$project_file" --no-progress
 
 normalized_output="$(dirname -- "$project_output")/$(basename -- "$project_output" | tr '-' '_')"

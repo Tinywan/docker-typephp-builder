@@ -5,7 +5,10 @@ SDK_DIR="/opt/typephp/vendor/swoole/phpx/full-static/sdk"
 mkdir -p "$SDK_DIR/lib/musl" "$SDK_DIR/include/php" "$SDK_DIR/include/phpx" "$SDK_DIR/include"
 
 # 1. 拷贝 musl 启动目标文件
-cp -f /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/crtn.o "$SDK_DIR/lib/musl/"
+for crt in crt1.o crti.o crtn.o; do
+  crt_file=$(find /usr/lib /lib -name "$crt" 2>/dev/null | head -n 1 || true)
+  [ -n "$crt_file" ] && cp -f "$crt_file" "$SDK_DIR/lib/musl/"
+done
 
 # 2. 编译 static embed libphp.a
 PHP_BUILD_DIR="/tmp/php-src"
@@ -92,23 +95,36 @@ gcc -fPIC -c /tmp/gmp_compat_stubs.c -o /tmp/gmp_compat_stubs.o
 # 4. 合并 fat archive
 MERGE_DIR="/tmp/merge_objects"
 mkdir -p "$MERGE_DIR"
-for lib in "$LIBPHP_STATIC" /usr/lib/libc.a /usr/lib/libstdc++.a /usr/lib/libz.a /usr/lib/libonig.a; do
-  if [ -f "$lib" ]; then
-    libname="$(basename "$lib" .a)"
-    subdir="$MERGE_DIR/$libname"
+for libname in libc.a libstdc++.a libz.a libonig.a; do
+  lib=$(find /usr/lib /lib -name "$libname" 2>/dev/null | head -n 1 || true)
+  if [ -n "$lib" ] && [ -f "$lib" ]; then
+    shortname="$(basename "$lib" .a)"
+    subdir="$MERGE_DIR/$shortname"
     mkdir -p "$subdir"
     (
       cd "$subdir"
       ar x "$lib"
       for f in *.o; do
-        [ -f "$f" ] && mv "$f" "${libname}_${f}"
+        [ -f "$f" ] && mv "$f" "${shortname}_${f}"
       done
     ) || true
   fi
 done
+if [ -n "$LIBPHP_STATIC" ] && [ -f "$LIBPHP_STATIC" ]; then
+  subdir="$MERGE_DIR/libphp"
+  mkdir -p "$subdir"
+  (
+    cd "$subdir"
+    ar x "$LIBPHP_STATIC"
+    for f in *.o; do
+      [ -f "$f" ] && mv "$f" "libphp_${f}"
+    done
+  ) || true
+fi
 cp /tmp/gmp_compat_stubs.o "$MERGE_DIR/"
 find "$MERGE_DIR" -name "*.o" | sort | xargs ar rcs "$SDK_DIR/lib/libphp.a"
 ranlib "$SDK_DIR/lib/libphp.a"
+
 
 # 5. 编译 static libphpx.a
 cmake -S /opt/typephp/vendor/swoole/phpx/full-static -B /tmp/phpx-static-build \

@@ -58,7 +58,7 @@ RUN composer require swoole/typephp:${TYPEPHP_VERSION} --prefer-dist --no-progre
 # 7. 预编译 PHPX 动态运行时库 (libphpx.so)，并注册到系统动态链接器
 RUN PHPX_DIR="/opt/typephp/vendor/swoole/phpx" \
     && cd "$PHPX_DIR" \
-    && sed -i 's/include_directories(include tests\/include src\/misc)/include_directories(include tests\/include src\/misc \/usr\/include \/usr\/local\/include \/usr\/include\/x86_64-linux-gnu)/g' CMakeLists.txt \
+    && sed -i 's/include_directories(include tests\/include src\/misc)/include_directories(include tests\/include src\/misc \/usr\/include \/usr\/local\/include \/usr\/include\/x86_64-linux-gnu \/usr\/include\/aarch64-linux-gnu)/g' CMakeLists.txt \
     && cmake . -Dphp_dir="/usr" -DBUILD_TESTS=OFF -DBUILD_EXT=OFF \
     && make phpx -j$(nproc) \
     && mkdir -p "$PHPX_DIR/lib" \

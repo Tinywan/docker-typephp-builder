@@ -135,7 +135,7 @@ jobs="$(nproc 2>/dev/null || echo 2)"
 [[ "$jobs" -lt 1 ]] && jobs=1
 sed -i "s/^job:.*/job: ${jobs}/" "$project_file"
 
-echo "[INFO] Compiling Linux x86_64 Musl full-static binary with Clang (job=${jobs})..."
+echo "[INFO] Compiling Linux Musl full-static binary with Clang (arch=$(uname -m), job=${jobs})..."
 "${tpc[@]}" "$project_file" --full-static --compiler=clang --no-progress
 
 normalized_output="$(dirname -- "$project_output")/$(basename -- "$project_output" | tr '-' '_')"

@@ -7,7 +7,7 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/tinywan/typephp-builder?style=flat-square&logo=docker)](https://hub.docker.com/r/tinywan/typephp-builder)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Compiler: TypePHP](https://img.shields.io/badge/Compiler-TypePHP-2E9E5B.svg?style=flat-square)](https://github.com/swoole/typephp)
-[![Target: Linux x86_64](https://img.shields.io/badge/Target-Linux%20x86__64-FCC624.svg?logo=linux&style=flat-square)](https://github.com/Tinywan/docker-typephp-builder)
+[![Target: Multi-Arch](https://img.shields.io/badge/Arch-x86__64%20%7C%20arm64%20(Apple%20Silicon)-success.svg?logo=linux&style=flat-square)](https://github.com/Tinywan/docker-typephp-builder)
 
 </div>
 
@@ -67,13 +67,13 @@ graph LR
 
 ## 🚀 快速上手
 
-### 1. 基础编译命令（Linux / macOS / Windows PowerShell）
+### 1. 基础编译命令（Linux x86_64 / macOS Apple Silicon / Windows）
 
 进入你的 Webman 或 TypePHP 项目根目录（需已包含 `project.linux.yml` 或 `project.yml`）：
 
 ```bash
+# 镜像原生支持 x86_64 与 arm64，macOS (M1/M2/M3/M4) 将自动跑原生高速 ARM64 编译：
 docker run --rm \
-  --platform linux/amd64 \
   -v "$(pwd)":/workspace \
   tinywan/typephp-builder:alpine
 ```

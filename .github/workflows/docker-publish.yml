@@ -38,12 +38,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME || secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD || secrets.DOCKERHUB_TOKEN }}
 
-      # 1. 构建并发布 Alpine Musl 全静态编译引擎
+      # 1. 构建并发布 Alpine Musl 全静态编译引擎 (支持 Intel x86_64 与 Apple Silicon / ARM64)
       - name: Build & Push Alpine Static Builder
         uses: docker/build-push-action@v5
         with:
           context: ./alpine
           file: ./alpine/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' && steps.docker_creds.outputs.has_creds == 'true' }}
           tags: |
             tinywan/typephp-builder:alpine
@@ -53,12 +54,13 @@ jobs:
             tinywan/typephp-webman-builder:alpine
             tinywan/typephp-webman-builder-static:${{ github.ref_name }}
 
-      # 2. 构建并发布 Glibc 动态便携包编译引擎
+      # 2. 构建并发布 Glibc 动态便携包编译引擎 (支持 Intel x86_64 与 Apple Silicon / ARM64)
       - name: Build & Push Glibc Builder
         uses: docker/build-push-action@v5
         with:
           context: ./glibc
           file: ./glibc/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' && steps.docker_creds.outputs.has_creds == 'true' }}
           tags: |
             tinywan/typephp-builder:glibc
