@@ -97,12 +97,12 @@ jobs:
           cp bin/typephp-builder docker-compose.yml README.md dist-assets/linux/
           chmod +x dist-assets/macos/* dist-assets/linux/*
 
-          (cd dist-assets/windows && zip -r "../typephp-builder-${VERSION}-windows-x86_64.zip" .)
-          tar -czf "dist-assets/typephp-builder-${VERSION}-macos-arm64.tar.gz" -C dist-assets/macos .
-          tar -czf "dist-assets/typephp-builder-${VERSION}-linux-x86_64.tar.gz" -C dist-assets/linux .
+          (cd dist-assets/windows && zip -r "../typephp-builder_${VERSION}_windows-x86_64_php-8.5.0.zip" .)
+          tar -czf "dist-assets/typephp-builder_${VERSION}_macos-arm64_php-8.5.0.tar.gz" -C dist-assets/macos .
+          tar -czf "dist-assets/typephp-builder_${VERSION}_linux-x86_64_php-8.5.0.tar.gz" -C dist-assets/linux .
 
           gh release upload "${{ github.ref_name }}" \
-            "dist-assets/typephp-builder-${VERSION}-windows-x86_64.zip" \
-            "dist-assets/typephp-builder-${VERSION}-macos-arm64.tar.gz" \
-            "dist-assets/typephp-builder-${VERSION}-linux-x86_64.tar.gz" \
+            "dist-assets/typephp-builder_${VERSION}_windows-x86_64_php-8.5.0.zip" \
+            "dist-assets/typephp-builder_${VERSION}_macos-arm64_php-8.5.0.tar.gz" \
+            "dist-assets/typephp-builder_${VERSION}_linux-x86_64_php-8.5.0.tar.gz" \
             --clobber || true
