@@ -208,7 +208,7 @@ if [[ -e "$final_dir" ]]; then
         echo "[ERROR] Output '$output_dir' already exists; use --force to overwrite it." >&2
         exit 1
     fi
-    mv "$final_dir" "$real_workspace/.typephp/previous-$build_id"
+    rm -rf "$final_dir" 2>/dev/null || mv "$final_dir" "$real_workspace/.typephp/previous-$build_id" 2>/dev/null || true
 fi
 
 cp -a "$stage_dir" "$final_dir"

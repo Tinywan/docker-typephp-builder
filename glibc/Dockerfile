@@ -1,13 +1,81 @@
-ARG BASE_IMAGE=tinywan/typephp-linux-x64:v0.9.4
-FROM ${BASE_IMAGE}
+# ============================================================
+# TypePHP AOT Builder (Linux Glibc Portable)
+# Linux x86_64 glibc portable-dir builder for Webman & TypePHP projects
+# ============================================================
+
+FROM ubuntu:22.04
+
+ARG TYPEPHP_VERSION=v0.9.4
 
 LABEL maintainer="Tinywan <gwmpgc@gmail.com>"
 LABEL org.opencontainers.image.title="TypePHP AOT Builder (Linux Glibc Portable)"
 LABEL org.opencontainers.image.description="Linux x86_64 glibc portable-dir builder for Webman & TypePHP projects"
 LABEL org.opencontainers.image.source="https://github.com/Tinywan/docker-typephp-builder"
 
+ENV DEBIAN_FRONTEND=noninteractive \
+    COMPOSER_NO_INTERACTION=1 \
+    COMPOSER_PROCESS_TIMEOUT=0 \
+    PHP_HOME=/usr
+
+# 1. 系统构建基础依赖 + GPG 工具链
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential cmake pkg-config python3-dev patchelf \
+        libgmp-dev libmpfr-dev libevent-dev \
+        ca-certificates curl git unzip gnupg gpg-agent file \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. 配置官方 Ondrej PHP 源
+RUN curl -fsSL 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x4f4ea0aae5267a6c' | gpg --dearmor -o /etc/apt/trusted.gpg.d/ondrej-php.gpg \
+    && echo 'deb [signed-by=/etc/apt/trusted.gpg.d/ondrej-php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu jammy main' > /etc/apt/sources.list.d/ondrej-php.list
+
+# 3. 安装 PHP 8.4 及全部所需扩展与 embed/dev 开发库
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        php8.4-cli php8.4-dev php8.4-embed \
+        php8.4-curl php8.4-mbstring php8.4-zip php8.4-mysql \
+        php8.4-xml php8.4-gd php8.4-redis php8.4-igbinary \
+        php8.4-msgpack php8.4-posix \
+    && rm -rf /var/lib/apt/lists/*
+
+# 4. 安装 Composer
+RUN curl -sS https://getcomposer.org/installer | php -- \
+        --install-dir=/usr/local/bin --filename=composer
+
+# 5. Patch php_hash.h for C++ compatibility
+RUN PHP_INC="$(php-config --include-dir 2>/dev/null || echo '')" \
+    && if [ -n "$PHP_INC" ]; then \
+        find "$PHP_INC" /usr/include -name "php_hash.h" \
+          -exec sed -i \
+            's/static inline const php_hash_ops\* php_hash_fetch_ops/static inline const struct _php_hash_ops\* php_hash_fetch_ops/g' \
+            {} + 2>/dev/null || true; \
+    fi
+
+# 6. 内置 TypePHP 源码与全局命令 tpc
+WORKDIR /opt/typephp
+RUN composer require swoole/typephp:${TYPEPHP_VERSION} --prefer-dist --no-progress \
+    && ln -sf /opt/typephp/vendor/bin/tpc.php /usr/local/bin/tpc \
+    && chmod +x /usr/local/bin/tpc
+
+# 7. 预编译 PHPX 动态运行时库 (libphpx.so)，并注册到系统动态链接器
+RUN PHPX_DIR="/opt/typephp/vendor/swoole/phpx" \
+    && cd "$PHPX_DIR" \
+    && sed -i 's/include_directories(include tests\/include src\/misc)/include_directories(include tests\/include src\/misc \/usr\/include \/usr\/local\/include \/usr\/include\/x86_64-linux-gnu)/g' CMakeLists.txt \
+    && cmake . -Dphp_dir="/usr" -DBUILD_TESTS=OFF -DBUILD_EXT=OFF \
+    && make phpx -j$(nproc) \
+    && mkdir -p "$PHPX_DIR/lib" \
+    && cp -f "$PHPX_DIR/libphpx.so" "$PHPX_DIR/lib/" 2>/dev/null || true \
+    && echo "$PHPX_DIR/lib" > /etc/ld.so.conf.d/typephp.conf \
+    && echo "$PHPX_DIR" >> /etc/ld.so.conf.d/typephp.conf \
+    && ldconfig \
+    && echo "[OK] Precompiled libphpx.so created and registered to system ldconfig successfully"
+
+# 8. 配置 Entrypoint 脚本
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod 0755 /entrypoint.sh
+
+ENV PATH="/opt/typephp/vendor/bin:${PATH}" \
+    TYPEPHP_HOME="/opt/typephp" \
+    PHPX_HOME="/opt/typephp/vendor/swoole/phpx" \
+    LD_LIBRARY_PATH="/opt/typephp/vendor/swoole/phpx/lib:/opt/typephp/vendor/swoole/phpx:/usr/lib"
 
 WORKDIR /workspace
 ENTRYPOINT ["/entrypoint.sh"]

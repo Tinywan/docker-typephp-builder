@@ -201,7 +201,7 @@ done
 
 # Ensure core runtime libraries libphpx and libphp exist
 for required_library in 'libphpx.so*' 'libphp.so*'; do
-    found_lib="$(find /opt /usr "$stage_dir/lib" -name "$required_library" -type f 2>/dev/null | head -n 1 || true)"
+    found_lib="$(find /opt /usr -name "$required_library" -type f 2>/dev/null | head -n 1 || true)"
     if [[ -n "$found_lib" && -f "$found_lib" ]]; then
         libname="$(basename "$found_lib")"
         clean_libname="${libname%%.*}.so"
@@ -238,35 +238,20 @@ error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED
 display_errors=stderr
 display_startup_errors=Off
 
-; 核心进程管理与网络扩展
-extension=ctype.so
-extension=tokenizer.so
-extension=phar.so
-extension=iconv.so
-extension=posix.so
-extension=mbstring.so
-extension=mysqlnd.so
-extension=pdo.so
-extension=pdo_mysql.so
-extension=mysqli.so
-extension=curl.so
-extension=fileinfo.so
-extension=zip.so
-extension=igbinary.so
-extension=msgpack.so
-extension=redis.so
-extension=sockets.so
-extension=event.so
 EOF
 
-while IFS= read -r line || [[ -n "$line" ]]; do
-    if echo "$line" | grep -q "^extension="; then
-        ext_file=$(echo "$line" | cut -d'=' -f2 | tr -d '[:space:]')
-        if [[ ! -f "$stage_dir/ext/$ext_file" ]]; then
-            sed -i "s/^extension=$ext_file$/; extension=$ext_file ; (not found)/" "$stage_dir/php.ini"
+# 遵循官方 conf.d 依赖顺序自动追加当前打包扩展
+for inifile in $(find /etc/php -path "*/cli/conf.d/*.ini" 2>/dev/null | sort -V); do
+    grep -E '^\s*(extension|zend_extension)\s*=' "$inifile" 2>/dev/null | while read -r line; do
+        ext_target=$(echo "$line" | cut -d'=' -f2 | tr -d '[:space:]')
+        ext_filename=$(basename "$ext_target")
+        if [[ "$ext_filename" != "opcache.so" ]]; then
+            if [[ -f "$stage_dir/ext/$ext_filename" ]] && ! grep -q "^extension=$ext_filename$" "$stage_dir/php.ini"; then
+                echo "extension=$ext_filename" >> "$stage_dir/php.ini"
+            fi
         fi
-    fi
-done < "$stage_dir/php.ini"
+    done
+done
 
 # 5. Generate launcher scripts
 install -m 0755 /dev/stdin "$stage_dir/$output_name" <<SCRIPT
@@ -326,7 +311,7 @@ if [[ -e "$final_dir" ]]; then
         echo "[ERROR] Output '$output_dir' already exists; use --force to overwrite it." >&2
         exit 1
     fi
-    mv "$final_dir" "$real_workspace/.typephp/previous-$build_id"
+    rm -rf "$final_dir" 2>/dev/null || mv "$final_dir" "$real_workspace/.typephp/previous-$build_id" 2>/dev/null || true
 fi
 
 cp -a "$stage_dir" "$final_dir"

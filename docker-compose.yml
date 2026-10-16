@@ -7,7 +7,7 @@ services:
       context: ./alpine
       dockerfile: Dockerfile
       args:
-        BASE_IMAGE: tinywan/typephp-linux-x64-static:v0.9.4
+        TYPEPHP_VERSION: v0.9.4
     image: tinywan/typephp-builder:alpine
     container_name: typephp-builder-alpine
     platform: linux/amd64
@@ -25,7 +25,7 @@ services:
       context: ./glibc
       dockerfile: Dockerfile
       args:
-        BASE_IMAGE: tinywan/typephp-linux-x64:v0.9.4
+        TYPEPHP_VERSION: v0.9.4
     image: tinywan/typephp-builder:glibc
     container_name: typephp-builder-glibc
     platform: linux/amd64
