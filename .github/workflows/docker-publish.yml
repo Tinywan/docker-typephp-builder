@@ -38,6 +38,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME || secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD || secrets.DOCKERHUB_TOKEN }}
 
+      - name: Resolve Image Version
+        id: version
+        run: |
+          ref="${{ github.ref_name }}"
+          clean_version="${ref#v}"
+          echo "version=${clean_version}" >> "$GITHUB_OUTPUT"
+
       # 1. 构建并发布 Alpine Musl 全静态编译引擎 (支持 Intel x86_64 与 Apple Silicon / ARM64)
       - name: Build & Push Alpine Static Builder
         uses: docker/build-push-action@v5
@@ -50,10 +57,13 @@ jobs:
             tinywan/typephp-builder:alpine
             tinywan/typephp-builder:static
             tinywan/typephp-builder:latest
+            tinywan/typephp-builder:${{ steps.version.outputs.version }}
+            tinywan/typephp-builder:${{ steps.version.outputs.version }}-alpine
+            tinywan/typephp-builder:${{ steps.version.outputs.version }}-static
             tinywan/typephp-builder:${{ github.ref_name }}
             tinywan/typephp-builder:${{ github.ref_name }}-alpine
-            tinywan/typephp-builder:${{ github.ref_name }}-static
             tinywan/typephp-webman-builder:alpine
+            tinywan/typephp-webman-builder-static:${{ steps.version.outputs.version }}
             tinywan/typephp-webman-builder-static:${{ github.ref_name }}
 
       # 2. 构建并发布 Glibc 动态便携包编译引擎 (支持 Intel x86_64 与 Apple Silicon / ARM64)
@@ -66,5 +76,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' && steps.docker_creds.outputs.has_creds == 'true' }}
           tags: |
             tinywan/typephp-builder:glibc
+            tinywan/typephp-builder:${{ steps.version.outputs.version }}-glibc
             tinywan/typephp-builder:${{ github.ref_name }}-glibc
+            tinywan/typephp-webman-builder:${{ steps.version.outputs.version }}
             tinywan/typephp-webman-builder:${{ github.ref_name }}
