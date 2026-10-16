@@ -55,6 +55,29 @@ graph LR
 
 ---
 
+## 🖥️ 支持的操作系统与 PHP 版本矩阵
+
+本构建器严格遵循 [Swoole TypePHP 官方系统与版本规范](https://github.com/swoole/typephp)：
+
+### 1. 宿主操作系统与架构支持
+
+| 宿主操作系统 | 芯片架构 | 运行方式 | 性能与架构特点 |
+| :--- | :--- | :--- | :--- |
+| **macOS** | **Apple Silicon (`arm64`)**<br>*(M1 / M2 / M3 / M4)* | Docker Desktop | **原生架构高速执行**，自动拉取原生 `linux/arm64` 镜像，彻底告别 QEMU 模拟 |
+| **macOS** | Intel (`x86_64`) | Docker Desktop | 原生 `linux/amd64` 镜像 |
+| **Linux** | `x86_64` / `amd64`<br>*(Ubuntu, Debian, CentOS, Alpine 等)* | Docker 原生运行 | 原生 `linux/amd64` 镜像 |
+| **Linux** | `aarch64` / `arm64`<br>*(ARM 云服务器, 树莓派等)* | Docker 原生运行 | 原生 `linux/arm64` 镜像 |
+| **Windows** | Windows 10 / 11 (`x86_64`) | Docker Desktop (WSL2) | 原生挂载运行，支持直接双击 `build.cmd` 一键执行 |
+
+### 2. PHP 版本与运行时对应关系
+
+- **TypePHP 编译器内核版本**：默认内置并升级至最新的 **`swoole/typephp:^0.9.5`**（编译器自身要求 `PHP >=8.4 <8.6`）。
+- **Alpine 纯静态镜像**：内置 **PHP 8.5.0** 静态嵌入核心（`libphp.a`）与 Swoole PHPX，产出体积约 ~6MB 纯静态单文件。
+- **Ubuntu Glibc 镜像**：内置 **PHP 8.4** 嵌入式运行时（`libphp.so`）与全部常用扩展，产出开箱即用的便携动态目录。
+- **业务项目源码兼容**：完整支持编写自 PHP 8.1 / 8.2 / 8.3 / 8.4 的 Webman / Laravel / ThinkPHP 项目。
+
+---
+
 ## 🏷️ Docker 镜像标签一览
 
 | 编译形态 | 浮动最新标签 (Floating Tag) | 固定版本标签 (Pinned Version Tag) | 说明 |
